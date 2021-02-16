@@ -2,9 +2,8 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.Employee;
 import com.example.demo.repos.EmployeeDataService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,13 +11,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeDataService employeeDataService;
+    private final EmployeeDataService employeeDataService;
+
+    public EmployeeController(EmployeeDataService employeeDataService) {
+        this.employeeDataService = employeeDataService;
+    }
 
     @GetMapping("/getAll")
     private Flux<Employee> getAll() {
@@ -35,9 +38,12 @@ public class EmployeeController {
                 .get()
                 .uri("http://localhost:8080/employees/getAll")
                 .retrieve()
-                .to(Employee.class)
-                .map(Employee::getSalary)
-                .reduce(Integer::sum);
+                .bodyToMono(new ParameterizedTypeReference<List<Employee>>() {
+                })
+                .map(t -> t.stream()
+                        .map(Employee::getSalary)
+                        .reduce(Integer::sum)
+                ).map(e -> e.orElse(null));
     }
 
 }
