@@ -23,14 +23,14 @@ public class EmployeeData implements EmployeeDataService {
         return employeeDataFlux;
     }
 
-    private Collection<Employee> emitBatch(int from, int to){
+    private Collection<Employee> emitBatch(int from, int to) {
         Collection<Employee> employees = new LinkedList<>();
 
         for (int i = from; i < to; i++) {
             Employee created = new Employee("Name" + i,
                     "Surname" + i,
                     "Java Dev",
-                    i*100);
+                    i * 100);
 
             employees.add(created);
         }

@@ -4,6 +4,7 @@ import com.example.demo.dto.Employee;
 import com.example.demo.repos.EmployeeDataService;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,6 +45,16 @@ public class EmployeeController {
                         .map(Employee::getSalary)
                         .reduce(Integer::sum)
                 ).map(e -> e.orElse(null));
+    }
+
+    @GetMapping("/findByName/{name}")
+    private Flux<Employee> findByName(@PathVariable String name) {
+        return WebClient.create()
+                .get()
+                .uri("http://localhost:8080/employees/getAll")
+                .retrieve()
+                .bodyToFlux(Employee.class)
+                .filter(t -> t.getName().equals(name));
     }
 
 }
